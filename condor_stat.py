@@ -1,11 +1,15 @@
 #! /vols/cms/tr1123/condor_tools/env/bin/python
 
+import os
 import htcondor
 import subprocess
+import getpass
+import datetime
 from typing import DefaultDict
 from collections import defaultdict
 from termcolor import colored
 from prettytable import PrettyTable
+from collections import Counter
 
 # Initialize the Collector and Schedd
 collector = htcondor.Collector()
@@ -93,7 +97,32 @@ def format_table(user_stats: DefaultDict) -> PrettyTable:
     
     return tab
 
+def log():
+    """ Logs the usage of the script """
+    # Get the current user's username
+    username = getpass.getuser()
+    real_name = get_real_name(username)
+    
+    # Get the current timestamp
+    timestamp = datetime.datetime.now().isoformat()
+    
+    # Log to file
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    log_file_path = os.path.join(script_dir, "usage_log.txt")
+    with open(log_file_path, "a+") as log_file:
+        # Write the timestamp, username, and real name to the log file
+        log_file.write(f"{timestamp}, {username}, {real_name}\n")
+        
+        # Get tally
+        try:
+            log_file.seek(0)
+            tally = Counter(line.strip().split(",")[2].strip() for line in log_file if "," in line)
+            log_file.write(f"Tally: {dict(tally)}\n")
+        except Exception:
+            pass
+
 if __name__ == "__main__":
+    log()
     user_stats = fetch_jobs()
     table = format_table(user_stats)
     print(table)
