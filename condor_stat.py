@@ -2,6 +2,7 @@
 
 import os
 import htcondor
+import argparse
 import subprocess
 import getpass
 import datetime
@@ -9,7 +10,6 @@ from typing import DefaultDict
 from collections import defaultdict
 from termcolor import colored
 from prettytable import PrettyTable
-from collections import Counter
 
 # Initialize the Collector and Schedd
 collector = htcondor.Collector()
@@ -60,12 +60,16 @@ def fetch_jobs() -> DefaultDict:
         user_jobs[owner].append(job_info)
         user_stats[owner][machine_type][job_info["Status"]] += 1
         user_stats[owner]['Total'][job_info["Status"]] += 1
-                
+
     return user_stats
 
 def format_table(user_stats: DefaultDict) -> PrettyTable:
     # Setup table
-    tab = PrettyTable(['User', 'Name' ,'CPU', 'GPU', 'Total'], align='l', hrules=1)
+    if priority:
+        headers = ['User', 'Name', 'Priority', 'CPU', 'GPU', 'Total']
+    else:
+        headers = ['User', 'Name', 'CPU', 'GPU', 'Total']
+    tab = PrettyTable(headers, align='l', hrules=1)
     status_for_print = ['Running', 'Idle', 'Held']
     machine_stats = defaultdict(lambda: dict(zip(status_for_print, [0]*len(status_for_print))))
     
@@ -73,6 +77,8 @@ def format_table(user_stats: DefaultDict) -> PrettyTable:
     for user, jobs in user_stats.items():
         row = [user]
         row.append(get_real_name(user))
+        if priority:
+            row.append(user_priorities.get(user, -1))
         for machine_type, stats in jobs.items():
             s = ''
             total = 0
@@ -93,7 +99,11 @@ def format_table(user_stats: DefaultDict) -> PrettyTable:
             s += colored(f"{status}: {stats[status]}", 'red') + '\n'
         s += colored(f"Total: {sum(stats.values())}", 'red')
         totals.append(s)
-    tab.add_row([colored('Total', 'red'), ''] + totals)
+    if priority:
+        tab.add_row([colored('Total', 'red'), '', ''] + totals)
+    else:
+        tab.add_row([colored('Total', 'red'), ''] + totals)
+        
     
     return tab
 
@@ -113,15 +123,24 @@ def log():
         # Write the timestamp, username, and real name to the log file
         log_file.write(f"{timestamp}, {username}, {real_name}\n")
         
-        # Get tally
-        try:
-            log_file.seek(0)
-            tally = Counter(line.strip().split(",")[2].strip() for line in log_file if "," in line)
-            log_file.write(f"Tally: {dict(tally)}\n")
-        except Exception:
-            pass
-
 if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Display HTCondor job stats.')
+    parser.add_argument('--priority', action='store_true', help='Display user priorities.')
+    args = parser.parse_args()
+    priority = args.priority
+    
+    if priority:
+        # Get user priorities from condor_userprio --allusers
+        # because the AdTypes.Negotiator leaves out some users
+        user_priorities = defaultdict(float)
+        result = subprocess.run(['condor_userprio', '-allusers', '-priority'], stdout=subprocess.PIPE)
+        lines = result.stdout.decode('utf-8').split('\n')[4:-3] # Cursed
+        for line in lines:
+            parts = line.split()
+            if len(parts) >= 3:
+                user_priorities[parts[0].split('@')[0]] = float(parts[1])  # Use the second column as the priority
+    
     log()
     user_stats = fetch_jobs()
     table = format_table(user_stats)
