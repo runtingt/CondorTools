@@ -77,8 +77,6 @@ def format_table(user_stats: DefaultDict) -> PrettyTable:
     for user, jobs in user_stats.items():
         row = [user]
         row.append(get_real_name(user))
-        if user == "gu18":
-            print("Hi George, it's Lucas :)")
         if priority:
             row.append(user_priorities.get(user, -1))
         for machine_type, stats in jobs.items():
