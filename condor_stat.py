@@ -103,8 +103,7 @@ def format_table(user_stats: DefaultDict) -> PrettyTable:
         tab.add_row([colored('Total', 'red'), '', ''] + totals)
     else:
         tab.add_row([colored('Total', 'red'), ''] + totals)
-        
-    
+
     return tab
 
 def log():
@@ -144,4 +143,8 @@ if __name__ == "__main__":
     log()
     user_stats = fetch_jobs()
     table = format_table(user_stats)
+    # Print intro message with current date and time
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    intro_message = f"HTCondor Job Stats @ {current_datetime}"
+    print(intro_message)
     print(table)
