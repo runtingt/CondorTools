@@ -63,7 +63,7 @@ def fetch_jobs() -> DefaultDict:
 
     return user_stats
 
-def format_table(user_stats: DefaultDict) -> PrettyTable:
+def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable:
     # Setup table
     if priority:
         headers = ['User', 'Name', 'Priority', 'CPU', 'GPU', 'Total']
@@ -89,7 +89,16 @@ def format_table(user_stats: DefaultDict) -> PrettyTable:
                 machine_stats[machine_type][status] += val
             s += f"Total: {total}"
             row.append(s)
-        tab.add_row(row)
+        if user == current_user:
+            c_row = []
+            for entry in row:
+                # Apply color to the text content only, not the dividers
+                colored_lines = [colored(line, 'green') for line in entry.split('\n')]
+                colored_entry = '\n'.join(colored_lines)
+                c_row.append(colored_entry)
+            tab.add_row(c_row)
+        else:
+            tab.add_row(row)
     
     # Get totals by machine type
     totals = []
@@ -129,6 +138,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     priority = args.priority
     
+    # Get the user who ran the script
+    username = getpass.getuser()
+    
     if priority:
         # Get user priorities from condor_userprio --allusers
         # because the AdTypes.Negotiator leaves out some users
@@ -142,7 +154,7 @@ if __name__ == "__main__":
     
     log()
     user_stats = fetch_jobs()
-    table = format_table(user_stats)
+    table = format_table(user_stats, current_user=username)
     # Print intro message with current date and time
     current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     intro_message = f"HTCondor Job Stats @ {current_datetime}"
