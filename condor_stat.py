@@ -93,7 +93,7 @@ def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable
             c_row = []
             for entry in row:
                 # Apply color to the text content only, not the dividers
-                colored_lines = [colored(line, 'green') for line in entry.split('\n')]
+                colored_lines = [colored(line, 'green') for line in str(entry).split('\n')]
                 colored_entry = '\n'.join(colored_lines)
                 c_row.append(colored_entry)
             tab.add_row(c_row)
