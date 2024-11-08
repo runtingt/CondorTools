@@ -1,5 +1,5 @@
 #! /vols/cms/tr1123/condor_tools/env/bin/python
-
+import sys
 import os
 import htcondor
 import argparse
@@ -108,10 +108,14 @@ def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable
             s += colored(f"{status}: {stats[status]}", 'red') + '\n'
         s += colored(f"Total: {sum(stats.values())}", 'red')
         totals.append(s)
-    if priority:
-        tab.add_row([colored('Total', 'red'), '', ''] + totals)
-    else:
-        tab.add_row([colored('Total', 'red'), ''] + totals)
+    try:
+        if priority:
+            tab.add_row([colored('Total', 'red'), '', ''] + totals)
+        else:
+            tab.add_row([colored('Total', 'red'), ''] + totals)
+    except ValueError:
+        print("No jobs found in current schedd.")
+        sys.exit(1)
 
     return tab
 
@@ -137,6 +141,11 @@ if __name__ == "__main__":
     parser.add_argument('--priority', action='store_true', help='Display user priorities.')
     args = parser.parse_args()
     priority = args.priority
+
+    # Print intro message with current date and time
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    intro_message = f"HTCondor Job Stats @ {current_datetime}"
+    print(intro_message)
     
     # Get the user who ran the script
     username = getpass.getuser()
@@ -155,8 +164,4 @@ if __name__ == "__main__":
     log()
     user_stats = fetch_jobs()
     table = format_table(user_stats, current_user=username)
-    # Print intro message with current date and time
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    intro_message = f"HTCondor Job Stats @ {current_datetime}"
-    print(intro_message)
     print(table)
