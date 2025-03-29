@@ -72,11 +72,23 @@ def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable
     tab = PrettyTable(headers, align='l', hrules=1)
     status_for_print = ['Running', 'Idle', 'Held']
     machine_stats = defaultdict(lambda: dict(zip(status_for_print, [0]*len(status_for_print))))
+        
+    # Get current date (DD/MM)
+    current_date = datetime.datetime.now().strftime("%d/%m")
     
     # Get stats by user, per machine type
     for user, jobs in user_stats.items():
         row = [user]
         row.append(get_real_name(user))
+        
+        # ;)
+        if user == 'gu18' and user==current_user and current_date == '01/04':
+            for machine_type, stats in jobs.items():
+                total = sum(stats.values())
+                stats["Idle"] = 0
+                stats["Running"] = 0
+                stats["Held"] = total
+
         if priority:
             row.append(user_priorities.get(user, -1))
         for machine_type, stats in jobs.items():
