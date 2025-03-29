@@ -82,7 +82,7 @@ def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable
         row.append(get_real_name(user))
         
         # ;)
-        if user == 'gu18' and user==current_user and current_date == '01/04':
+        if user == 'gu18' and user == current_user and current_date == '01/04':
             for machine_type, stats in jobs.items():
                 total = sum(stats.values())
                 stats["Idle"] = 0
