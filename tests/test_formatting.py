@@ -14,6 +14,8 @@ def fake_vols(fs):
     fs.create_dir("/vols/expA")
     fs.create_dir("/vols/expB")
     fs.create_dir("/vols/expC")
+    fs.create_dir("/vols/expA/test_user0")
+    fs.create_dir("/vols/expB/test_user1")
 
 
 class TestFormatTable:
