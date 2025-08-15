@@ -1,4 +1,5 @@
 from collections import defaultdict
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -22,11 +23,9 @@ test_context = TableContext(
 
 
 class TestCondorSetup:
-    def test_setup_condor(self):
-        try:
-            _setup_condor()
-        except Exception as e:
-            pytest.fail(f"Setup failed with exception: {e}")
+    with patch("htcondor.Schedd", return_value=MagicMock()) as mock_schedd:
+        _setup_condor()
+        mock_schedd.assert_called_once()
 
 
 class TestGetRealName:
