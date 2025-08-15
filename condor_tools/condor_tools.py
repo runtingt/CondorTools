@@ -51,8 +51,10 @@ def _get_real_name(username: str) -> str:
         pass
     return ""
 
+
 def _get_experiments() -> list[str]:
     return os.listdir("/vols")
+
 
 def _get_experiment_users(experiments: list[str]):
     """Map users to experiments they are associated with"""
@@ -60,7 +62,7 @@ def _get_experiment_users(experiments: list[str]):
     for exp in experiments:
         path = f"/vols/{exp}" if exp != "t2k" else f"/vols/{exp}/users"
         experiment_users[exp] = os.listdir(path)
-        
+
     # Invert the map - get a list of experiments for each user
     user_experiments = defaultdict(list)
     for exp, users in experiment_users.items():
@@ -213,7 +215,7 @@ def format_table(
         only=only,
         user_priorities=user_priorities,
         priority=priority,
-        user_experiments = _get_experiment_users(_get_experiments())
+        user_experiments=_get_experiment_users(_get_experiments()),
     )
 
     machine_stats = defaultdict(lambda: dict(zip(STATUSES_TO_PRINT, [0] * len(STATUSES_TO_PRINT))))
