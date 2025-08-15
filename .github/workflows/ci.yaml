@@ -38,7 +38,7 @@ jobs:
         python-version: '3.11'
 
     - name: Install dependencies
-      run: pip install pytest pytest-cov pyfakefs pytest-mock htcondor
+      run: pip install pytest pytest-cov pyfakefs pytest-mock htcondor prettytable
 
     - name: Run tests
       run: pytest --cov-report=xml --cov=condor_tools --cov-context=test tests
