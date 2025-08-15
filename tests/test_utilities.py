@@ -23,9 +23,10 @@ test_context = TableContext(
 
 
 class TestCondorSetup:
-    with patch("htcondor.Schedd", return_value=MagicMock()) as mock_schedd:
-        _setup_condor()
-        mock_schedd.assert_called_once()
+    def test_setup_condor(self):
+        with patch("htcondor.Schedd", return_value=MagicMock()) as mock_schedd:
+            _setup_condor()
+            mock_schedd.assert_called_once()
 
 
 class TestGetRealName:
