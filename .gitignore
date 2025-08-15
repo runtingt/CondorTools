@@ -1,1 +1,4 @@
 usage_log.txt
+__pycache__/
+.coverage
+*dev.py
