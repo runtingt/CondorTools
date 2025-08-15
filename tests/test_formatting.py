@@ -4,6 +4,18 @@ from ..condor_tools.condor_tools import fetch_jobs, format_table
 from .test_htcondor import TEST_JOBS
 
 
+@pytest.fixture(autouse=True)
+def fake_vols(fs):
+    """
+    Provide a fake /vols directory with dummy experiment folders.
+    """
+    # Create /vols and some fake experiments
+    fs.create_dir("/vols")
+    fs.create_dir("/vols/expA")
+    fs.create_dir("/vols/expB")
+    fs.create_dir("/vols/expC")
+
+
 class TestFormatTable:
     @pytest.mark.parametrize("only", [None, "cpu"])
     @pytest.mark.parametrize("priority", [True, False])
