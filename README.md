@@ -1,5 +1,7 @@
 # Condor Tools
 
+[![python version](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/) [![codecov](https://codecov.io/gh/runtingt/CondorTools/graph/badge.svg?token=JBIJUS9P00)](https://codecov.io/gh/runtingt/CondorTools) [![CI](https://github.com/runtingt/CondorTools/actions/workflows/ci.yaml/badge.svg)](https://github.com/runtingt/CondorTools/actions/workflows/ci.yaml)
+
 Useful script(s) for viewing statistics about a HTCondor pool.
 
 ## Usage
