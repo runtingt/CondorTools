@@ -20,10 +20,11 @@ def test_log_writes_to_file(fs, monkeypatch):
 
     # Arrange: Patch datetime so the timestamp is fixed
     fixed_time = datetime.datetime(2025, 1, 1, 12, 0, 0)
-    monkeypatch.setattr(datetime, "datetime", type("dt", (), {
-        "now": staticmethod(lambda: fixed_time),
-        "isoformat": datetime.datetime.isoformat
-    }))
+    monkeypatch.setattr(
+        datetime,
+        "datetime",
+        type("dt", (), {"now": staticmethod(lambda: fixed_time), "isoformat": datetime.datetime.isoformat}),
+    )
 
     # Arrange: Ensure __file__ location exists in fake FS
     script_dir = "/fake/dir"
@@ -39,8 +40,8 @@ def test_log_writes_to_file(fs, monkeypatch):
         content = f.read()
 
     assert content == "2025-01-01T12:00:00, testuser, Test User\n"
-    
-    
+
+
 @pytest.mark.parametrize("priority", [True, False])
 def test_main_with_priority(monkeypatch, caplog, priority):
     # Fake a bunch of stuff
@@ -61,8 +62,7 @@ def test_main_with_priority(monkeypatch, caplog, priority):
         monkeypatch.setattr(sys, "argv", ["script.py", "--only", "cpu"])
     monkeypatch.setattr(getpass, "getuser", lambda: "testuser")
     monkeypatch.setattr(
-        subprocess, "run",
-        lambda *a, **kw: subprocess.CompletedProcess(args=a, returncode=0, stdout=fake_output)
+        subprocess, "run", lambda *a, **kw: subprocess.CompletedProcess(args=a, returncode=0, stdout=fake_output)
     )
     monkeypatch.setattr(condor_tools, "log", lambda: None)
     monkeypatch.setattr(condor_tools, "_setup_condor", lambda: (None, "schedd"))
