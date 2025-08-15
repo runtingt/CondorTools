@@ -164,13 +164,11 @@ def _get_row(user: str, jobs: defaultdict, ctx: TableContext) -> tuple[list[str]
 
 
 def _highlight_row(user: str, current_user: str, row: list[str]) -> list[str]:
-    if user == current_user:
+    if user == current_user and sys.stdout.isatty():
         c_row = []
         for entry in row:
-            # Apply color to the text content only, not the dividers
             colored_lines = [colored(line, "green") for line in str(entry).split("\n")]
-            colored_entry = "\n".join(colored_lines)
-            c_row.append(colored_entry)
+            c_row.append("\n".join(colored_lines))
         return c_row
     return row
 
