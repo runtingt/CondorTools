@@ -15,6 +15,7 @@ from termcolor import colored
 
 STATUSES_TO_PRINT = ["Running", "Idle", "Held"]
 
+
 # Setup logging
 class CustomFormatter(logging.Formatter):
     """Custom formatter to allow plain text output"""
@@ -175,7 +176,11 @@ def _highlight_row(user: str, current_user: str, row: list[str]) -> list[str]:
 
 
 def format_table(
-    user_stats: defaultdict, only: str, user_priorities: dict[str, float], current_user: Optional[str] = None, priority: bool = False
+    user_stats: defaultdict,
+    only: str,
+    user_priorities: dict[str, float],
+    current_user: Optional[str] = None,
+    priority: bool = False,
 ) -> PrettyTable:
     """Format job statistics into a table."""
     headers = _get_headers(priority, only)
@@ -184,7 +189,11 @@ def format_table(
 
     # Create context object to reduce parameter passing
     ctx = TableContext(
-        current_user=current_user or "", current_date=current_date, only=only, user_priorities=user_priorities, priority=priority
+        current_user=current_user or "",
+        current_date=current_date,
+        only=only,
+        user_priorities=user_priorities,
+        priority=priority,
     )
 
     machine_stats = defaultdict(lambda: dict(zip(STATUSES_TO_PRINT, [0] * len(STATUSES_TO_PRINT))))
