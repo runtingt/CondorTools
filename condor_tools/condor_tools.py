@@ -51,6 +51,24 @@ def _get_real_name(username: str) -> str:
         pass
     return ""
 
+def _get_experiments() -> list[str]:
+    return os.listdir("/vols")
+
+def _get_experiment_users(experiments: list[str]):
+    """Map users to experiments they are associated with"""
+    experiment_users = {}
+    for exp in experiments:
+        path = f"/vols/{exp}" if exp != "t2k" else f"/vols/{exp}/users"
+        experiment_users[exp] = os.listdir(path)
+        
+    # Invert the map - get a list of experiments for each user
+    user_experiments = defaultdict(list)
+    for exp, users in experiment_users.items():
+        for user in users:
+            user_experiments[user].append(exp)
+
+    return user_experiments
+
 
 def fetch_jobs(only: str, schedd) -> defaultdict:
     """Fetch and print job details from HTCondor schedd, grouped and ranked by user based on job count"""
@@ -122,6 +140,7 @@ class TableContext:
     only: str
     user_priorities: dict[str, float]
     priority: bool
+    user_experiments: dict[str, list[str]]
 
 
 def _build_machine_stats_string(machine_type: str, stats: defaultdict, machine_stats: defaultdict) -> str:
@@ -139,7 +158,7 @@ def _build_machine_stats_string(machine_type: str, stats: defaultdict, machine_s
 
 def _get_row(user: str, jobs: defaultdict, ctx: TableContext) -> tuple[list[str], defaultdict]:
     """Generate a table row for a user with their job statistics."""
-    row = [user, _get_real_name(user)]
+    row = [user, _get_real_name(user) + f" ({', '.join(ctx.user_experiments.get(user, ['???']))})"]
     machine_stats = defaultdict(lambda: dict(zip(STATUSES_TO_PRINT, [0] * len(STATUSES_TO_PRINT))))
 
     # ;)
@@ -194,6 +213,7 @@ def format_table(
         only=only,
         user_priorities=user_priorities,
         priority=priority,
+        user_experiments = _get_experiment_users(_get_experiments())
     )
 
     machine_stats = defaultdict(lambda: dict(zip(STATUSES_TO_PRINT, [0] * len(STATUSES_TO_PRINT))))
