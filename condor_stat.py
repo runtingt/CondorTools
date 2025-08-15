@@ -1,15 +1,16 @@
 #! /vols/cms/tr1123/condor_tools/env/bin/python
-import sys
-import os
-import htcondor
 import argparse
-import subprocess
-import getpass
 import datetime
-from typing import DefaultDict
+import getpass
+import os
+import subprocess
+import sys
 from collections import defaultdict
-from termcolor import colored
+from typing import Optional
+
+import htcondor
 from prettytable import PrettyTable
+from termcolor import colored
 
 # Initialize the Collector and Schedd
 collector = htcondor.Collector()
@@ -28,7 +29,7 @@ def get_real_name(username: str) -> str:
         pass
     return ""
 
-def fetch_jobs() -> DefaultDict:
+def fetch_jobs(only: str) -> defaultdict:
     """ Fetch and print job details from HTCondor schedd, grouped and ranked by user based on job count """
     status_dict = {1: 'Idle', 2: 'Running', 3: 'Removed', 4: 'Completed', 5: 'Held', 6: 'Transferring Output', 7: 'Suspended'}
     
@@ -57,18 +58,30 @@ def fetch_jobs() -> DefaultDict:
                 machine_type = 'CPU'
         else:
             machine_type = 'CPU'
+        
+        # Filter on machine type if specified
+        if only and machine_type.lower() != only.lower():
+            continue
+        
         user_jobs[owner].append(job_info)
         user_stats[owner][machine_type][job_info["Status"]] += 1
         user_stats[owner]['Total'][job_info["Status"]] += 1
 
     return user_stats
 
-def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable:
+def format_table(user_stats: defaultdict, only: str, current_user: Optional[str]=None) -> PrettyTable:
     # Setup table
     if priority:
         headers = ['User', 'Name', 'Priority', 'CPU', 'GPU', 'Total']
     else:
         headers = ['User', 'Name', 'CPU', 'GPU', 'Total']
+    if only:
+        headers.remove('Total')
+        if only.lower() == 'cpu':
+            headers.remove('GPU')
+        elif only.lower() == 'gpu':
+            headers.remove('CPU')
+
     tab = PrettyTable(headers, align='l', hrules=1)
     status_for_print = ['Running', 'Idle', 'Held']
     machine_stats = defaultdict(lambda: dict(zip(status_for_print, [0]*len(status_for_print))))
@@ -92,6 +105,8 @@ def format_table(user_stats: DefaultDict, current_user: str=None) -> PrettyTable
         if priority:
             row.append(user_priorities.get(user, -1))
         for machine_type, stats in jobs.items():
+            if only and machine_type.lower() != only.lower():
+                continue
             s = ''
             total = 0
             for status in status_for_print:
@@ -151,6 +166,7 @@ if __name__ == "__main__":
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Display HTCondor job stats.')
     parser.add_argument('--priority', action='store_true', help='Display user priorities.')
+    parser.add_argument('--only', choices=['cpu', 'gpu'], help='Filter jobs by machine type (CPU or GPU).')
     args = parser.parse_args()
     priority = args.priority
 
@@ -174,6 +190,6 @@ if __name__ == "__main__":
                 user_priorities[parts[0].split('@')[0]] = float(parts[1])  # Use the second column as the priority
     
     log()
-    user_stats = fetch_jobs()
-    table = format_table(user_stats, current_user=username)
+    user_stats = fetch_jobs(args.only)
+    table = format_table(user_stats, args.only, current_user=username)
     print(table)
