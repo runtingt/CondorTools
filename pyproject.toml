@@ -1,3 +1,37 @@
+[project]
+name = "condor_tools"
+version = "1.1.0"
+description = "A collection of tools for working with Condor jobs and data."
+requires-python = "==3.9.21"
+authors = [{name = "Tom Runting", email = "thomas.runting@cern.ch"}]
+
+dependencies = [
+    "coverage==7.10.3",
+    "exceptiongroup==1.3.0",
+    "htcondor==24.0.10",
+    "iniconfig==2.1.0",
+    "packaging==25.0",
+    "pluggy==1.6.0",
+    "prettytable==3.11.0",
+    "pyfakefs==5.9.2",
+    "Pygments==2.19.2",
+    "pytest==8.4.1",
+    "pytest-cov==6.2.1",
+    "pytest-mock==3.14.1",
+    "ruff==0.12.9",
+    "termcolor==2.4.0",
+    "tomli==2.2.1",
+    "typing_extensions==4.14.1",
+    "wcwidth==0.2.13",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["condor_tools*"]
+
 [tool.ruff]
 line-length = 120
 exclude = ['env']
