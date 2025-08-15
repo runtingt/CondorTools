@@ -113,16 +113,17 @@ class TestGetRow:
 class TestHighlightRow:
     @pytest.mark.parametrize("current_user", ["test_user0", "test_user1"])
     def test_highlight_row(self, current_user):
-        user = "test_user0"
-        test_context.current_user = current_user
-        row = _get_row(
-            user=user,
-            jobs={"cpu": {"Running": 1, "Idle": 2, "Held": 3}, "gpu": {"Running": 0, "Idle": 1, "Held": 0}},
-            ctx=test_context,
-        )[0]
-        h_row = _highlight_row(user, test_context.current_user, row)
+        with patch.dict(_highlight_row.__globals__, {"colored": lambda t, *_: "COLOURED" + t}):
+            user = "test_user0"
+            test_context.current_user = current_user
+            row = _get_row(
+                user=user,
+                jobs={"cpu": {"Running": 1, "Idle": 2, "Held": 3}, "gpu": {"Running": 0, "Idle": 1, "Held": 0}},
+                ctx=test_context,
+            )[0]
+            h_row = _highlight_row(user, test_context.current_user, row)
 
-        if user != current_user:
-            assert h_row == row
-        else:
-            assert h_row[0] == f"\033[32m{user}\033[0m"
+            if user != current_user:
+                assert h_row == row
+            else:
+                assert h_row[0] == "COLOURED" + user
