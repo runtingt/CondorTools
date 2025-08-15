@@ -19,6 +19,7 @@ test_context = TableContext(
     only=None,
     user_priorities={"test_user0": 1.0, "test_user1": 1.1, "gu18": 0.5},
     priority=False,
+    user_experiments={"test_user0": ["expA"], "test_user1": ["expB"], "gu18": ["expC"]},
 )
 
 
@@ -89,7 +90,7 @@ class TestGetRow:
         row, machine_stats = _get_row(user=user, jobs=jobs, ctx=test_context)
         assert row[0] == user
         if user == "test_user0":
-            assert row[1] == "???"
+            assert row[1] == "??? (expA)"
         if priority:
             assert row[2] == test_context.user_priorities[user]
             if only:
