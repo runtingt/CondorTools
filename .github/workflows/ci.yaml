@@ -41,7 +41,7 @@ jobs:
       run: pip install pytest pytest-cov pyfakefs pytest-mock htcondor
 
     - name: Run tests
-      run: source env/bin/activate && pytest --cov-report=xml --cov=condor_tools --cov-context=test tests
+      run: pytest --cov-report=xml --cov=condor_tools --cov-context=test tests
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
