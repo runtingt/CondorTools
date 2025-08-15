@@ -4,6 +4,14 @@
 
 Useful script(s) for viewing statistics about a HTCondor pool.
 
+## Installation
+
+```bash
+virtualenv env --python=python3.9.21
+source env/bin/activate
+pip install .
+```
+
 ## Usage
 
 There are various options available for the `condor_stat.py` script - see the help message for details:
