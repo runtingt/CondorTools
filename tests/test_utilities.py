@@ -1,3 +1,4 @@
+import subprocess
 from collections import defaultdict
 from unittest.mock import MagicMock, patch
 
@@ -13,13 +14,42 @@ from ..condor_tools.condor_tools import (
     _setup_condor,
 )
 
+
+@pytest.fixture(autouse=True)
+def fake_groups(mocker):
+    """
+    Mock the 'groups' command accessed through subprocess.run to give expected output.
+    """
+    user_groups = {
+        "test_user0": ["test_user0", "expA0"],
+        "test_user1": ["test_user1", "expB0"],
+    }
+
+    # keep real (unmocked) subprocess.run for when groups cmd is not run
+    real_subprocess_run = subprocess.run
+
+    def mock_subprocess_run(cmd, *args, **kwargs):
+        if cmd[0] == "groups":
+            user = cmd[1]
+            if user in user_groups:
+                stdout = f"{user} : {' '.join(user_groups.get(user))}"
+            else:
+                raise ValueError("Unexpected user")
+
+            fake_result = subprocess.CompletedProcess(args=cmd, returncode=0, stdout=stdout, stderr="")
+            return fake_result
+        else:
+            return real_subprocess_run(cmd, *args, **kwargs)
+
+    mocker.patch("subprocess.run", side_effect=mock_subprocess_run)
+
+
 test_context = TableContext(
     current_user="test_user0",
     current_date="2023-10-01",
     only=None,
     user_priorities={"test_user0": 1.0, "test_user1": 1.1, "gu18": 0.5},
     priority=False,
-    user_experiments={"test_user0": ["expA"], "test_user1": ["expB"], "gu18": ["expC"]},
 )
 
 

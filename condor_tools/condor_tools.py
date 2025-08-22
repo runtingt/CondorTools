@@ -52,24 +52,23 @@ def _get_real_name(username: str) -> str:
     return ""
 
 
-def _get_experiments() -> list[str]:
-    return os.listdir("/vols")
-
-
-def _get_experiment_users(experiments: list[str]):
-    """Map users to experiments they are associated with"""
-    experiment_users = {}
-    for exp in experiments:
-        path = f"/vols/{exp}" if exp != "t2k" else f"/vols/{exp}/users"
-        experiment_users[exp] = os.listdir(path)
-
-    # Invert the map - get a list of experiments for each user
-    user_experiments = defaultdict(list)
-    for exp, users in experiment_users.items():
-        for user in users:
-            user_experiments[user].append(exp)
-
-    return user_experiments
+def _get_user_experiments(username: str, excluded_groups: Optional[list[str]] = None) -> str:
+    """Get user's experiment(s) using groups command"""
+    if excluded_groups is None:
+        excluded_groups = [username, "res0", "htcuser"]
+    try:
+        result = subprocess.run(["groups", username], check=False, stdout=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            excluded_groups.append(username)
+            # command output is formatted like username : username group1 group2 ...
+            groups = result.stdout.split(":")[1].split()
+            # remove "0" that appears at the end of the experiment groups, e.g. cms0
+            experiments = [g[:-1] for g in groups if g not in excluded_groups]
+            if experiments:
+                return experiments
+    except Exception:
+        pass
+    return ["???"]
 
 
 def fetch_jobs(only: str, schedd) -> defaultdict:
@@ -142,7 +141,6 @@ class TableContext:
     only: str
     user_priorities: dict[str, float]
     priority: bool
-    user_experiments: dict[str, list[str]]
 
 
 def _build_machine_stats_string(machine_type: str, stats: defaultdict, machine_stats: defaultdict) -> str:
@@ -160,7 +158,7 @@ def _build_machine_stats_string(machine_type: str, stats: defaultdict, machine_s
 
 def _get_row(user: str, jobs: defaultdict, ctx: TableContext) -> tuple[list[str], defaultdict]:
     """Generate a table row for a user with their job statistics."""
-    row = [user, _get_real_name(user) + f" ({', '.join(ctx.user_experiments.get(user, ['???']))})"]
+    row = [user, _get_real_name(user) + f" ({', '.join(_get_user_experiments(user))})"]
     machine_stats = defaultdict(lambda: dict(zip(STATUSES_TO_PRINT, [0] * len(STATUSES_TO_PRINT))))
 
     # ;)
@@ -215,7 +213,6 @@ def format_table(
         only=only,
         user_priorities=user_priorities,
         priority=priority,
-        user_experiments=_get_experiment_users(_get_experiments()),
     )
 
     machine_stats = defaultdict(lambda: dict(zip(STATUSES_TO_PRINT, [0] * len(STATUSES_TO_PRINT))))
