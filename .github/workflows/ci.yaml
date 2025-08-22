@@ -37,10 +37,13 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.9.21'
 
     - name: Install dependencies
       run: pip install pytest pytest-cov pyfakefs pytest-mock htcondor prettytable termcolor
+
+    - name: Install package
+      run: pip install .
 
     - name: Run tests
       run: pytest --cov-report=xml --cov=condor_tools --cov-context=test tests
