@@ -54,6 +54,9 @@ extend-select = [
     "NPY",         # NumPy specific rules
     "TID251",      # flake8-tidy-imports
 ]
+ignore = [
+    "G004",    # Logging f-string
+]
 
 [tool.ruff.format]
 quote-style = "double"
