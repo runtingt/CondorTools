@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import getpass
+import importlib.metadata
 import logging
 import os
 import subprocess
@@ -14,6 +15,7 @@ from prettytable import PrettyTable
 from termcolor import colored
 
 STATUSES_TO_PRINT = ["Running", "Idle", "Held"]
+__version__ = importlib.metadata.version("condor-tools")
 
 
 # Setup logging
@@ -274,7 +276,7 @@ def main():
     parser.add_argument("--only", choices=["cpu", "gpu"], help="Filter jobs by machine type (CPU or GPU).")
     args = parser.parse_args()
     priority = args.priority
-    logging.info("HTCondor Job Stats")
+    logging.info(f"HTCondor Job Stats v{__version__}")
 
     # Get the user who ran the script
     username = getpass.getuser()

@@ -1,6 +1,6 @@
 [project]
 name = "condor_tools"
-version = "1.1.0"
+version = "1.1.1"
 description = "A collection of tools for working with Condor jobs and data."
 requires-python = "==3.9.21"
 authors = [{name = "Tom Runting", email = "thomas.runting@cern.ch"}]
@@ -53,6 +53,9 @@ extend-select = [
     "EXE",         # flake8-executable
     "NPY",         # NumPy specific rules
     "TID251",      # flake8-tidy-imports
+]
+ignore = [
+    "G004",    # Logging f-string
 ]
 
 [tool.ruff.format]
