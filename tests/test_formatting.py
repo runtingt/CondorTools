@@ -2,20 +2,7 @@ import pytest
 
 from ..condor_tools.condor_tools import fetch_jobs, format_table
 from .test_htcondor import TEST_JOBS
-
-
-@pytest.fixture(autouse=True)
-def fake_vols(fs):
-    """
-    Provide a fake /vols directory with dummy experiment folders.
-    """
-    # Create /vols and some fake experiments
-    fs.create_dir("/vols")
-    fs.create_dir("/vols/expA")
-    fs.create_dir("/vols/expB")
-    fs.create_dir("/vols/expC")
-    fs.create_dir("/vols/expA/test_user0")
-    fs.create_dir("/vols/expB/test_user1")
+from .test_utilities import fake_groups  # noqa: F401
 
 
 class TestFormatTable:
