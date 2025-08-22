@@ -1,6 +1,6 @@
 [project]
 name = "condor_tools"
-version = "1.1.0"
+version = "1.1.1"
 description = "A collection of tools for working with Condor jobs and data."
 requires-python = "==3.9.21"
 authors = [{name = "Tom Runting", email = "thomas.runting@cern.ch"}]
