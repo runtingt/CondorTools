@@ -252,7 +252,7 @@ def format_table(
     return tab
 
 
-def log():
+def log(args: argparse.Namespace):
     """Logs the usage of the script"""
     # Get the current user's username
     username = getpass.getuser()
@@ -266,7 +266,7 @@ def log():
     log_file_path = os.path.join(script_dir, "usage_log.txt")
     with open(log_file_path, "a+") as log_file:
         # Write the timestamp, username, and real name to the log file
-        log_file.write(f"{timestamp}, {username}, {real_name}\n")
+        log_file.write(f'{timestamp}, {username}, {real_name}, {str(vars(args)).replace(",", ";").replace(" ", "")}\n')
 
 
 def main():
@@ -295,7 +295,7 @@ def main():
     else:
         user_priorities = {}
 
-    log()
+    log(args)
     user_stats = fetch_jobs(args.only, _setup_condor()[1])
     table = format_table(user_stats, args.only, user_priorities, current_user=username, priority=priority)
     logging.info(table, extra={"simple": True})
