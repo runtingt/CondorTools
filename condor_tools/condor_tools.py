@@ -63,8 +63,9 @@ def _get_user_experiments(username: str, excluded_groups: Optional[list[str]] = 
     if excluded_groups is None:
         excluded_groups = [username, "res0", "htcuser"]
     try:
-        result = subprocess.run(["groups", username], check=False, text=True,
-                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        result = subprocess.run(
+            ["groups", username], check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        )
         if result.returncode == 0:
             excluded_groups.append(username)
             # command output is formatted like username : username group1 group2 ...
@@ -271,7 +272,7 @@ def log(args: argparse.Namespace):
     log_file_path = os.path.join(script_dir, "usage_log.txt")
     with open(log_file_path, "a+") as log_file:
         # Write the timestamp, username, and real name to the log file
-        log_file.write(f'{timestamp}, {username}, {real_name}, {str(vars(args)).replace(",", ";").replace(" ", "")}\n')
+        log_file.write(f"{timestamp}, {username}, {real_name}, {str(vars(args)).replace(',', ';').replace(' ', '')}\n")
 
 
 def main():
