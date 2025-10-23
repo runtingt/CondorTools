@@ -42,16 +42,20 @@ def _setup_condor() -> tuple:
 
 def _get_real_name(username: str) -> str:
     """Uses the 'pinky' command to get the real name of a user from their username"""
+    real_name = ""
     try:
         # Parse output of 'pinky' to extract the real name
         result = subprocess.run(["pinky", "-l", username], check=False, stdout=subprocess.PIPE, text=True)
         if result.returncode == 0:
             for line in result.stdout.split("\n"):
                 if "In real life:" in line:
-                    return line.split("In real life:")[1].strip()
+                    real_name = line.split("In real life:")[1].strip()
     except Exception:
         pass
-    return ""
+    finally:
+        if real_name in {"???", ""}:
+            real_name = "Unknown"
+    return real_name
 
 
 def _get_user_experiments(username: str, excluded_groups: Optional[list[str]] = None) -> str:
@@ -59,7 +63,9 @@ def _get_user_experiments(username: str, excluded_groups: Optional[list[str]] = 
     if excluded_groups is None:
         excluded_groups = [username, "res0", "htcuser"]
     try:
-        result = subprocess.run(["groups", username], check=False, stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(
+            ["groups", username], check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        )
         if result.returncode == 0:
             excluded_groups.append(username)
             # command output is formatted like username : username group1 group2 ...
@@ -252,7 +258,7 @@ def format_table(
     return tab
 
 
-def log():
+def log(args: argparse.Namespace):
     """Logs the usage of the script"""
     # Get the current user's username
     username = getpass.getuser()
@@ -266,7 +272,7 @@ def log():
     log_file_path = os.path.join(script_dir, "usage_log.txt")
     with open(log_file_path, "a+") as log_file:
         # Write the timestamp, username, and real name to the log file
-        log_file.write(f"{timestamp}, {username}, {real_name}\n")
+        log_file.write(f"{timestamp}, {username}, {real_name}, {str(vars(args)).replace(',', ';').replace(' ', '')}\n")
 
 
 def main():
@@ -295,7 +301,7 @@ def main():
     else:
         user_priorities = {}
 
-    log()
+    log(args)
     user_stats = fetch_jobs(args.only, _setup_condor()[1])
     table = format_table(user_stats, args.only, user_priorities, current_user=username, priority=priority)
     logging.info(table, extra={"simple": True})
