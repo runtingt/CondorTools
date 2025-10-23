@@ -63,7 +63,7 @@ class TestCondorSetup:
 class TestGetRealName:
     """Test cases for _get_real_name function."""
 
-    @pytest.mark.parametrize("username, expected", [("testuser", "???"), (None, "")])
+    @pytest.mark.parametrize("username, expected", [("testuser", "Unknown"), (None, "Unknown")])
     def test_get_real_name(self, username, expected):
         result = _get_real_name(username)
         assert result == expected
@@ -120,7 +120,7 @@ class TestGetRow:
         row, machine_stats = _get_row(user=user, jobs=jobs, ctx=test_context)
         assert row[0] == user
         if user == "test_user0":
-            assert row[1] == "??? (expA)"
+            assert row[1] == "Unknown (expA)"
         if priority:
             assert row[2] == test_context.user_priorities[user]
             if only:

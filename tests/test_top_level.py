@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import getpass
 import os
@@ -32,14 +33,15 @@ def test_log_writes_to_file(fs, monkeypatch):
     monkeypatch.setattr(condor_tools, "__file__", os.path.join(script_dir, "myscript.py"))
 
     # Act
-    condor_tools.log()
+    args = argparse.Namespace(priority=False, only=None)
+    condor_tools.log(args)
 
     # Assert: Check file contents
     log_path = os.path.join(script_dir, "usage_log.txt")
     with open(log_path) as f:
         content = f.read()
 
-    assert content == "2025-01-01T12:00:00, testuser, Test User\n"
+    assert content == "2025-01-01T12:00:00, testuser, Test User, {'priority':False;'only':None}\n"
 
 
 @pytest.mark.parametrize("priority", [True, False])
@@ -64,7 +66,7 @@ def test_main_with_priority(monkeypatch, caplog, priority):
     monkeypatch.setattr(
         subprocess, "run", lambda *a, **kw: subprocess.CompletedProcess(args=a, returncode=0, stdout=fake_output)
     )
-    monkeypatch.setattr(condor_tools, "log", lambda: None)
+    monkeypatch.setattr(condor_tools, "log", lambda args: None)
     monkeypatch.setattr(condor_tools, "_setup_condor", lambda: (None, "schedd"))
     monkeypatch.setattr(condor_tools, "fetch_jobs", lambda only, schedd: {"job": {"some": "stats"}})
     monkeypatch.setattr(condor_tools, "format_table", lambda *a, **k: "formatted table")
