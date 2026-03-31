@@ -55,7 +55,7 @@ test_context = TableContext(
 
 class TestCondorSetup:
     def test_setup_condor(self):
-        with patch("htcondor.Schedd", return_value=MagicMock()) as mock_schedd:
+        with patch("htcondor2.Schedd", return_value=MagicMock()) as mock_schedd:
             _setup_condor()
             mock_schedd.assert_called_once()
 
