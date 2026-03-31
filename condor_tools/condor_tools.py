@@ -10,7 +10,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Optional
 
-import htcondor
+import htcondor2
 from prettytable import PrettyTable
 from termcolor import colored
 
@@ -35,8 +35,8 @@ logging.basicConfig(level=logging.INFO, handlers=[handler])
 
 def _setup_condor() -> tuple:
     # Initialize the Collector and Schedd
-    collector = htcondor.Collector()
-    schedd = htcondor.Schedd()
+    collector = htcondor2.Collector()
+    schedd = htcondor2.Schedd()
     return collector, schedd
 
 
